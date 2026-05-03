@@ -1,0 +1,12 @@
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+results/*
+!results/.gitkeep
+
+# Local paper PDF (keep out of GitHub; cite ACL anthology instead)
+*.pdf
+
+# Large upstream artifact (eval uses Hugging Face BeaverTails, not this file)
+data/beavertails_critiques_aug.json
