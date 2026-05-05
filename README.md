@@ -4,8 +4,6 @@ This repository evaluates the public **ThinkGuard** checkpoint (Wen et al., 2025
 
 **Upstream model and paper:** [Rakancorle1/ThinkGuard](https://huggingface.co/Rakancorle1/ThinkGuard) · [ThinkGuard (arXiv)](https://arxiv.org/abs/2502.13458) · [luka-group/ThinkGuard](https://github.com/luka-group/ThinkGuard)
 
-![ThinkGuard illustration](./Figure/ThinkGuard.png)
-
 The repo adds **`src/tg_eval/`**, **`scripts/`**, and a **Google Colab notebook** that runs all experiments end-to-end. We do not retrain the model.
 
 ## What the three experiments are
