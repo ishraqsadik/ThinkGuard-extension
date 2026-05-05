@@ -142,12 +142,13 @@ def plot_summary_bar(summaries: List[Tuple[str, Dict[str, Any]]], out_path: Path
     labels = [s[0] for s in summaries]
     scores = []
     for _, s in summaries:
-        if "macro_f1_categories" in s:
-            scores.append(s["macro_f1_categories"])
-        elif "macro_f1_tasks" in s:
+        # WildGuardMix: task-macro F1. Binary benchmarks: F1 (Beaver multihot is often 0 with S*-only parsing).
+        if "macro_f1_tasks" in s:
             scores.append(s["macro_f1_tasks"])
         elif "binary" in s:
             scores.append(s["binary"]["f1"])
+        elif "macro_f1_categories" in s:
+            scores.append(s["macro_f1_categories"])
         else:
             scores.append(float("nan"))
     plt.figure(figsize=(max(4, len(labels) * 1.2), 3))

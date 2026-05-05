@@ -1,30 +1,48 @@
-# ThinkGuard 🛡️
+# ThinkGuard — reproduction and extensions
 
-ThinkGuard is an advanced guardrail model designed to enhance safety classification with deliberative slow thinking. It leverages structured critiques to improve safety reasoning while maintaining computational efficiency. ThinkGuard is built to achieve three key objectives:
+This repository evaluates the public **ThinkGuard** checkpoint (Wen et al., 2025, ACL Findings): an 8B safety guardrail built on **LLaMA Guard 3**–style moderation, trained with critique-augmented supervision so it can emit both a **safe / unsafe** verdict and a structured rationale.
 
-1. **Accurate safety classification** across multiple harm categories.  
-2. **Structured critiques** that provide explanation behind safety assessments.  
-3. **Scalability and efficiency** for real-world deployment.  
+**Upstream model and paper:** [Rakancorle1/ThinkGuard](https://huggingface.co/Rakancorle1/ThinkGuard) · [ThinkGuard (arXiv)](https://arxiv.org/abs/2502.13458) · [luka-group/ThinkGuard](https://github.com/luka-group/ThinkGuard)
 
-ThinkGuard is fine-tuned from [LLaMA-Guard-3-8B](https://huggingface.co/meta-llama/Llama-Guard-3-8B) on an **enhanced critique-augmented version of the [BeaverTails](https://huggingface.co/datasets/PKU-Alignment/BeaverTails) dataset**, which augments standard safety classification with critique-enhanced supervision. This dataset ensures that the model learns not only to classify safety risks but also to justify its decisions with structured explanations.
+![ThinkGuard illustration](./Figure/ThinkGuard.png)
 
-Model at huggingface: [ThinkGuard](https://huggingface.co/Rakancorle1/ThinkGuard)
+The repo adds **`src/tg_eval/`**, **`scripts/`**, and a **Google Colab notebook** that runs all experiments end-to-end. We do not retrain the model.
 
-For more details, refer to our paper: [ThinkGuard: Deliberative Slow Thinking Leads to Cautious Guardrails](https://arxiv.org/abs/2502.13458).
+## What the three experiments are
 
-![ThinkGuard Model](./Figure/ThinkGuard.png)
+| Block in the notebook | What it runs |
+|----------------------|----------------|
+| **Experiment 1** | Single-pass ThinkGuard on **BeaverTails**, **ToxicChat**, **WildGuardMix**, and **OpenAI moderation** (sample caps set in the first code cell). |
+| **Experiments 2a & 2b** | **Reflective** inference (three generations per row) on WildGuardMix, then on BeaverTails. |
+| **Experiment 3** | **Latency** (FP16/BF16 vs NF4) and a **matched-subset** BeaverTails eval under full precision vs 4-bit weights. |
 
-### 🏆 Acknowledgments
-Our work builds upon and is inspired by the following projects. We sincerely appreciate their contributions to the community:
+---
 
-- [llama-cookbook](https://github.com/meta-llama/llama-cookbook)
-- [LLaMA Guard-3](https://huggingface.co/meta-llama/Llama-Guard-3-8B)
-- [LLaMA Factory](https://github.com/hiyouga/LLaMA-Factory)
-- [Beavertails](https://github.com/PKU-Alignment/beavertails)
+## Running experiments in Google Colab
 
-## Citation
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ishraqsadik/ThinkGuard-repro-submission/blob/main/notebooks/ThinkGuard_Full_Experiment_Colab.ipynb)
 
-If you find our work helpful, please consider citing:
+Everything is driven by **`notebooks/ThinkGuard_Full_Experiment_Colab.ipynb`**. Run cells **top to bottom** on a **GPU** runtime. If you use the badge, **File → Save a copy in Drive** so you can edit `REPO_URL` and caps.
+
+### 1. Create a GPU runtime
+
+1. Open the notebook in Colab (e.g. upload it, or open from GitHub with Colab).
+2. **Runtime → Change runtime type →** choose a **GPU** (e.g. **T4**, **L4**, or **A100**). CPU is not suitable for the full notebook.
+3. **Runtime → Run all** is fine once secrets are set (next step).
+
+### 2. Hugging Face token (required)
+
+Several assets are **gated** on the Hub (notably **WildGuardMix**; BeaverTails may require access depending on your account).
+
+1. In Hugging Face: create a **read** access token and accept any **dataset / model access agreements** for the assets you use.
+2. In Colab: **Secrets** (toggled on for the notebook) → add secret name **`HF_TOKEN`** with that token.
+3. The first code cell loads `userdata.get("HF_TOKEN")` into `os.environ["HF_TOKEN"]`. If the assert fails, the secret name or visibility is wrong.
+
+Without a valid token, dataset or model downloads will fail with 401/403 errors.
+
+---
+
+## Citation (original ThinkGuard paper)
 
 ```bibtex
 @Inproceedings{wen2025thinkguard,
@@ -34,113 +52,3 @@ If you find our work helpful, please consider citing:
   year={2025}
 }
 ```
-
----
-
-## Student reproducibility harness (this repository)
-
-Upstream authors publish a minimal [`ThinkGuard.py`](ThinkGuard.py) demo; this fork adds **`src/tg_eval/`** plus **`scripts/`** so you can reproduce metrics on Google Colab without copying the official repo verbatim.
-
-### Google Colab (full experiment)
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ishraqsadik/ThinkGuard-repro-submission/blob/main/notebooks/ThinkGuard_Full_Experiment_Colab.ipynb)
-
-1. Fork/publish this project to **`ishraqsadik/ThinkGuard-repro-submission`** (or change the notebook’s `REPO_URL` to match your repo).
-2. Add Colab secret **`HF_TOKEN`** (read access to gated Hub assets).
-3. Open the notebook from the badge above (or upload [`notebooks/ThinkGuard_Full_Experiment_Colab.ipynb`](notebooks/ThinkGuard_Full_Experiment_Colab.ipynb) manually).
-
-### Dependencies
-
-Install PyTorch for your CUDA runtime first (see [pytorch.org](https://pytorch.org)), then:
-
-```bash
-pip install -r requirements.txt
-pip install git+https://github.com/meta-llama/llama-cookbook.git
-```
-
-The evaluation code imports **`llama_recipes`** (older installs) or **`llama_cookbook`** (current cookbook). Either must provide `prompt_format_utils.build_custom_prompt`.
-
-### Hugging Face access
-
-Export a read token with permission to gated assets you use:
-
-```bash
-export HF_TOKEN=hf_***
-```
-
-Required for **`meta-llama/Llama-Guard-3-8B`** if you swap `--model-id`, and for gated datasets (**`allenai/wildguardmix`**). Accept the dataset terms on the Hub before running.
-
-### Layout
-
-| Path | Role |
-|------|------|
-| [`src/tg_eval/prompting.py`](src/tg_eval/prompting.py) | LG3 prompt construction + generation |
-| [`src/tg_eval/parse.py`](src/tg_eval/parse.py) | `safe` / `unsafe` + `S*` category extraction |
-| [`src/tg_eval/data.py`](src/tg_eval/data.py) | BeaverTails / ToxicChat / WildGuardMix / OpenAI moderation loaders |
-| [`src/tg_eval/metrics.py`](src/tg_eval/metrics.py) | F1, AUPRC (pseudo-scores), BeaverTails macro-F1 over PKU hazards |
-| [`src/tg_eval/reflect.py`](src/tg_eval/reflect.py) | Extension A: 3-pass reflective inference |
-| [`src/tg_eval/latency.py`](src/tg_eval/latency.py) | Extension B timing harness |
-| [`scripts/run_eval.py`](scripts/run_eval.py) | Main CLI |
-| [`scripts/bench_latency.py`](scripts/bench_latency.py) | FP16/BF16 vs NF4 latency |
-
-**Note:** [luka-group/ThinkGuard](https://github.com/luka-group/ThinkGuard) does not ship separate evaluation utilities; parsing and metrics here are implemented locally and intentionally align BeaverTails prompts with the dataset’s 14 PKU hazard keys for multi-label macro-F1.
-
-### Environment for runs
-
-```bash
-set PYTHONPATH=%CD%\src
-```
-
-PowerShell:
-
-```powershell
-$env:PYTHONPATH = "$PWD\src"
-```
-
-### Commands (local or Colab)
-
-Smoke test on a handful of BeaverTails examples (writes `ThinkGuard_cla_results_demo.json`):
-
-```bash
-python ThinkGuard.py
-```
-
-Full benchmark (pick one or `all`; use `--max-samples` while iterating):
-
-```bash
-python scripts/run_eval.py --benchmark beaver --max-samples 200 --output-dir results/beaver_dev
-python scripts/run_eval.py --benchmark toxic --max-samples 500 --output-dir results/toxic_dev
-python scripts/run_eval.py --benchmark wildguard --max-samples 200 --output-dir results/wildguard_dev
-python scripts/run_eval.py --benchmark openai --output-dir results/openai_full
-python scripts/run_eval.py --benchmark all --output-dir results/full_suite
-```
-
-**Extension A — reflective loop** (writes `summary_reflect.json` and, for WildGuardMix, `reflect_vs_single.png`):
-
-```bash
-python scripts/run_eval.py --benchmark wildguard --reflect --max-samples 128 --output-dir results/wildguard_reflect
-```
-
-**Extension B — quantized inference + latency** (`results/latency.json` compares stacked runs):
-
-```bash
-python scripts/bench_latency.py --benchmark beaver --num-prompts 16 --repeats 40 --max-new-tokens 64
-```
-
-To evaluate accuracy under NF4 weights, rerun `scripts/run_eval.py` with `--quantize-4bit` (same prompts/metrics path).
-
-### Outputs
-
-Each run writes under `--output-dir`:
-
-- `predictions.json` — raw generations + parsed fields  
-- `summary_single.json` — aggregated metrics  
-- `summary_reflect.json` — appears when `--reflect` is set  
-- `metrics_summary.csv` — merged table when looping multiple benchmarks  
-- `overview_metrics.png` — bar chart for `--benchmark all`  
-
-WildGuardMix metrics use **macro-averaged F1** across two binary tasks (prompt harmfulness + response harmfulness) against the **same** guard verdict, matching the spirit of multi-task moderation benchmarks while staying tractable for course-scale compute.
-
-### Resources section for your PDF
-
-Document GPU type (Colab **T4/L4/A100**), approximate wall time, and whether WildGuardMix / Llama weights were gated behind `HF_TOKEN`.
