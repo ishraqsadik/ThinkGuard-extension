@@ -1,0 +1,2 @@
+accuracy,auprc,benchmark,f1,macro_f1_categories,n_evaluated,precision,recall,setting
+0.72,0.6801004408663984,beaver,0.7852760736196319,0.0,250,0.6918918918918919,0.9078014184397163,single

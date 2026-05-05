@@ -1,0 +1,13 @@
+{
+  "benchmark": "beaver",
+  "n": 300,
+  "verdict_field": "verdict",
+  "binary": {
+    "accuracy": 0.71,
+    "precision": 0.6743119266055045,
+    "recall": 0.901840490797546,
+    "f1": 0.7716535433070866,
+    "auprc": 0.6614551321738804
+  },
+  "macro_f1_categories": 0.0
+}

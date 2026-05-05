@@ -1,0 +1,22 @@
+{
+  "benchmark": "wildguard",
+  "n": 128,
+  "verdict_field": "verdict_reflect",
+  "per_task": {
+    "prompt_harm": {
+      "accuracy": 0.6640625,
+      "precision": 0.6822429906542056,
+      "recall": 0.8902439024390244,
+      "f1": 0.7724867724867724,
+      "auprc": 0.6776751624116708
+    },
+    "response_harm": {
+      "accuracy": 0.47244094488188976,
+      "precision": 0.3925233644859813,
+      "recall": 0.9545454545454546,
+      "f1": 0.5562913907284768,
+      "auprc": 0.39042942486904514
+    }
+  },
+  "macro_f1_tasks": 0.6643890816076246
+}

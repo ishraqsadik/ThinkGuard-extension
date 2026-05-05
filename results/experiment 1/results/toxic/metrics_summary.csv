@@ -1,0 +1,2 @@
+accuracy,auprc,benchmark,f1,n_evaluated,precision,recall,setting
+0.6,0.517737873466687,toxic,0.6527777777777778,250,0.5310734463276836,0.8468468468468469,single
